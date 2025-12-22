@@ -21,6 +21,41 @@ class _SignuppageState extends State<Signuppage> {
   TextEditingController passwordcontroller = TextEditingController();
   bool boolean = true;
 
+  void validationCheck() async {
+    if (namecontroller.text.isEmpty ||
+        phonecontroller.text.isEmpty ||
+        emailcontroller.text.isEmpty ||
+        passwordcontroller.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text("Kindly enter all the fields"),
+        ),
+      );
+    } else {
+      if (phonecontroller.text.length > 10 ||
+          !phonecontroller.text.startsWith(RegExp(r'^[789][0-9]{9}$'))) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text("Invalid phone number"),
+          ),
+        );
+      } else if (!emailcontroller.text.startsWith(
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'),
+      )) {
+       ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text("Invalid email"),
+          ),
+        );
+      }else{
+         await signup();
+      }
+    }
+  }
+
   Future<void> signup() async {
     print("Preseed the signup button");
     print(namecontroller.text);
@@ -39,11 +74,12 @@ class _SignuppageState extends State<Signuppage> {
         }),
       );
       if (response.statusCode == 200) {
+        //for now we are directly sending it to login page but once the OTP logic is completed then we will be sending it to OTP Screen.
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Loginpage()),
         );
-      }else{
+      } else {
         print("Error: ${response.statusCode}, ${response.body}");
       }
     } catch (e) {
@@ -108,48 +144,52 @@ class _SignuppageState extends State<Signuppage> {
                 controller: namecontroller,
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(
-                  hintText: "Enter your Name",
+                  prefixIcon: Icon(Icons.person),
+                  labelText: "Name",
                   enabledBorder: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(),
                 ),
               ),
-              SizedBox(height: height * 0.01),
+              SizedBox(height: height * 0.02),
 
               TextField(
                 controller: emailcontroller,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  hintText: "Enter your Email",
+                  prefixIcon: Icon(Icons.email),
+                  labelText: "Email",
                   enabledBorder: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(),
                 ),
               ),
-              SizedBox(height: height * 0.01),
+              SizedBox(height: height * 0.02),
 
               TextField(
                 controller: phonecontroller,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.phone),
                   prefixText: "+91",
-                  hintText: "Enter your phone no",
+                  labelText: "Phone no",
                   enabledBorder: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(),
                 ),
               ),
 
-              SizedBox(height: height * 0.01),
+              SizedBox(height: height * 0.02),
               TextField(
                 controller: passwordcontroller,
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: boolean,
                 obscuringCharacter: "*",
                 decoration: InputDecoration(
-                  hintText: "Enter your password",
+                  prefixIcon: Icon(Icons.password),
+                  labelText: "Password",
                   suffixIcon: IconButton(
                     onPressed: passwordVisibilty,
                     icon: boolean
-                        ? Icon(Icons.visibility)
-                        : Icon(Icons.visibility_off),
+                        ? Icon(Icons.visibility_off)
+                        : Icon(Icons.visibility),
                   ),
                   enabledBorder: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(),
@@ -166,7 +206,7 @@ class _SignuppageState extends State<Signuppage> {
                     ),
                     backgroundColor: Colors.blueAccent.shade200,
                   ),
-                  onPressed: signup,
+                  onPressed: validationCheck,
                   //()async {
                   //   //for development only
                   //   // Navigator.push(

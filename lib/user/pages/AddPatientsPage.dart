@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:careus/components/personalInfo.dart';
 import 'package:careus/components/reportsSection.dart';
 import 'package:careus/components/tabletSection.dart';
+import 'package:careus/user/pages/Homepage.dart';
 import 'package:careus/widgets/CustomAppbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,6 +18,7 @@ class Addpatientspage extends StatefulWidget {
 class _AddpatientspageState extends State<Addpatientspage> {
   bool? isMaleSelected = false;
   bool? isFemaleSelected = false;
+  bool? errorState=false;
   int currentStep = 0;
   File? myfile;
   bool isFileSelected = false;
@@ -50,10 +52,11 @@ class _AddpatientspageState extends State<Addpatientspage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height * 1;
+    final width = MediaQuery.of(context).size.width * 1;
+    
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(height * 0.08),
@@ -62,11 +65,20 @@ class _AddpatientspageState extends State<Addpatientspage> {
       body: Stepper(
         currentStep: currentStep,
         onStepContinue: () {
-          if (currentStep < 3) {
-            print("Is this Last Step ${currentStep}");
+          if (currentStep < 3 &&errorState! ) {
+            print("Is this Last Step ${currentStep} ${errorState}");
             setState(() {
               currentStep += 1;
             });
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  "Cannot proced furthur ... Kindly enter all the values!!",
+                ),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
           }
         },
         onStepCancel: () {
@@ -76,27 +88,62 @@ class _AddpatientspageState extends State<Addpatientspage> {
                   currentStep -= 1;
                 });
         },
-        onStepTapped: (value) {
-          setState(() {
-            currentStep = value;
-          });
+        controlsBuilder: (context, details) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: currentStep < 2
+                    ? details.onStepContinue
+                    : () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "Data submitted successfully ..Navigating to homepage..",
+                            ),
+                          ),
+                        );
+                        Future.delayed(Duration(seconds: 2), () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => Homepage()),
+                          );
+                        });
+                      },
+                child: Text(currentStep < 2 ? "continue" : "Done"),
+              ),
+
+              if (currentStep > 0)
+                TextButton(
+                  onPressed: details.onStepCancel,
+                  child: Text("Back"),
+                ),
+            ],
+          );
         },
         steps: [
           Step(
             isActive: currentStep >= 0,
             title: Text("Personal Information"),
-            content: Personalinfo(),
+            content: Personalinfo(
+              allfieldEntered: (bool val) {
+                print("What value im getting from ahead $val");
+                setState(() {
+                  errorState = val;
+                });
+              },
+            ),
           ),
 
           Step(
             isActive: currentStep >= 1,
             title: Text("Medical Reports"),
-            content: Reportssection()
+            content: Reportssection(),
           ),
           Step(
             isActive: currentStep >= 2,
             title: Text("Tablets Ongoing"),
-            content: Tabletsection()
+            content: Tabletsection(),
           ),
         ],
       ),

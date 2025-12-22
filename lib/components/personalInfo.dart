@@ -6,7 +6,8 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Personalinfo extends StatefulWidget {
-  const Personalinfo({super.key});
+  final Function(bool) allfieldEntered;
+  const Personalinfo({required this.allfieldEntered, super.key});
 
   @override
   State<Personalinfo> createState() => _PersonalinfoState();
@@ -20,6 +21,36 @@ class _PersonalinfoState extends State<Personalinfo> {
   String? patientGender;
   TextEditingController phoneNumber = TextEditingController();
   TextEditingController Address = TextEditingController();
+
+  void FieldsCheck() async {
+    if (patientName.text.isEmpty ||
+        patientAge.text.isEmpty ||
+        phoneNumber.text.isEmpty ||
+        Address.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Kindly enter all fields"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      widget.allfieldEntered(false);
+    }else if (phoneNumber.text.length > 10 ||
+          !phoneNumber.text.startsWith(RegExp(r'^[789][0-9]{9}$'))) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text("Invalid phone number"),
+          ),
+        );
+      }
+    
+    else {
+      setState(() {
+        widget.allfieldEntered(true);
+      });
+      await addPersonalInfo();
+    }
+  }
 
   Future<void> addPersonalInfo() async {
     try {
@@ -51,14 +82,34 @@ class _PersonalinfoState extends State<Personalinfo> {
         final pref = await SharedPreferences.getInstance();
         print("888888888888888888888");
         print(data["patient"]["_id"]);
-        
+
         print("888888888888888888888");
-        await pref.setString("pid",data["patient"]["_id"]);
+        await pref.setString("pid", data["patient"]["_id"]);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Added the patients personal details..")
-            ),
+          SnackBar(content: Text("Added the patients personal details..")),
         );
+        Future.delayed(const Duration(seconds: 3), () {
+          showDialog(context: context, builder: (context) {
+            return AlertDialog(
+              backgroundColor: Colors.yellow.shade200,
+              shape: BeveledRectangleBorder(),
+              content: SizedBox(
+                height: 20,
+                child: Text("Kindly Click on Navigate button for procedding further")),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(onPressed: (){
+                      Navigator.pop(context);
+                    }, child: Text("ok")),
+                  ],
+                )
+              ],
+            );
+            
+          },);
+        });
 
         print(
           "Successfully saved the Patients Personal inforamtion = > ${response.body}",
@@ -72,7 +123,6 @@ class _PersonalinfoState extends State<Personalinfo> {
       print("Failed to perform the functionality ${e}");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -180,12 +230,12 @@ class _PersonalinfoState extends State<Personalinfo> {
 
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: TextField(
+                    child: TextFormField(
                       controller: phoneNumber,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: "Phone no",
-                        prefix: Text("+91"),
+                        prefixText: "+91",
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(15)),
                         ),
@@ -194,6 +244,9 @@ class _PersonalinfoState extends State<Personalinfo> {
                           borderSide: BorderSide(color: Colors.blueGrey),
                         ),
                       ),
+                      validator: (value) {
+                        print(value);
+                      },
                     ),
                   ),
 
@@ -219,7 +272,7 @@ class _PersonalinfoState extends State<Personalinfo> {
                     padding: const EdgeInsets.all(8.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        addPersonalInfo();
+                        FieldsCheck();
                       },
                       child: Text("Save Information"),
                     ),
