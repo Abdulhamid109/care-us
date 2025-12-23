@@ -34,7 +34,7 @@ class _SignuppageState extends State<Signuppage> {
       );
     } else {
       if (phonecontroller.text.length > 10 ||
-          !phonecontroller.text.startsWith(RegExp(r'^[789][0-9]{9}$'))) {
+          !phonecontroller.text.startsWith(RegExp(r'^[6789][0-9]{9}$'))) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.red,

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:careus/constants/domain.dart';
 import 'package:careus/models/patientModal.dart';
+import 'package:careus/models/tabletsModal.dart';
+import 'package:careus/user/pages/IVR.dart';
 import 'package:careus/widgets/CustomAppbar.dart';
 import 'package:careus/widgets/CustomDrawer.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +40,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
     }
   }
 
-  List<Patient> mypatients = [];
+  List<Tabletsmodal> mypatients = [];
   
   
   Future<void>getMedicalTablets()async{
@@ -49,8 +51,11 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
         final jsonData = jsonDecode(response.body);
         List<dynamic> patients = jsonData["patients"];
         setState(() {
-          mypatients = patients.map((patient)=>Patient.fromJson(patient)).toList();
+          mypatients = patients.map((patient)=>Tabletsmodal.fromJson(patient)).toList();
         });
+        print("-------------------");
+        print(mypatients);
+        print("-------------------");
       }else{
         print("Something went wrong at ${response.statusCode} with response ${response.body}");
       }
@@ -322,7 +327,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "",
+                                data.illnessType,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w400,
@@ -361,7 +366,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                     ),
                                     Expanded(
                                       child: Text(
-                                        "Glycoment GP 0.5",
+                                        data.TabletName,
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w400,
@@ -391,7 +396,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                     ),
                                     Expanded(
                                       child: Text(
-                                        "2 times a day",
+                                        "${data.tabletFrequencey} times a day",
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w400,
@@ -421,7 +426,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                     ),
                                     Expanded(
                                       child: Text(
-                                        "30 days course",
+                                        "${data.CourseDuration} days course",
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w400,
@@ -464,7 +469,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                     ),
                                     Expanded(
                                       child: Text(
-                                        "Morning",
+                                        data.SlotType,
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w400,
@@ -485,7 +490,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                     SizedBox(
                                       width: 120,
                                       child: Text(
-                                        "Frequency:",
+                                        "Start-Time:",
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
@@ -494,7 +499,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                     ),
                                     Expanded(
                                       child: Text(
-                                        "2 times a day",
+                                        data.StartTime,
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w400,
@@ -515,7 +520,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                     SizedBox(
                                       width: 120,
                                       child: Text(
-                                        "Duration:",
+                                        "End-Time:",
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
@@ -524,7 +529,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                     ),
                                     Expanded(
                                       child: Text(
-                                        "30 days course",
+                                        data.EndTime,
                                         style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w400,
@@ -534,6 +539,40 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                   ],
                                 ),
                               ),
+
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: <Widget>[
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green,
+                                        shape: BeveledRectangleBorder(
+                                          borderRadius: BorderRadiusGeometry.all(Radius.circular(5))
+                                        )
+                                      ),
+                                      
+                                  onPressed: (){
+                                    
+                                  }, 
+                                  child: Text("Edit",style: TextStyle(color: Colors.white),)
+                                  ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blue,
+                                        shape: BeveledRectangleBorder(
+                                          borderRadius: BorderRadiusGeometry.all(Radius.circular(5))
+                                        )
+                                      ),
+                                  onPressed: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => Ivrpage(tabletid: data.id),));
+                                  }, 
+                                  child: Text("IVR Screen",style: TextStyle(color: Colors.white),)
+                                  )
+                                  ],
+                                ),
+                              )
                             ],
                           ),
                         ),
@@ -541,9 +580,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                       
                       },),
                       SizedBox(height: height * 0.02),
-              
-                      // Second Medical History Card
-                    ],
+                                  ],
                   ),
                 ),
               
