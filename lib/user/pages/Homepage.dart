@@ -138,13 +138,13 @@ class _HomepageState extends State<Homepage> {
                           crossAxisCount: 2,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: 0.9,
+                          childAspectRatio: 0.7,
                         ),
                         itemCount: allPatients.length,
                         itemBuilder: (context, index) {
                           final patient = allPatients[index];
                           return Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(18.0),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,

@@ -300,11 +300,11 @@ class _TabletsectionState extends State<Tabletsection> {
                             // do consider that after 12:00 am and before 6:00 am the user cannot add any tablet remider
                             addTabletDetails();
                           },
-                          child: Text("Save Tablet info"),
+                          child: Text("Save"),
                         ),
                         ElevatedButton(
                           onPressed: () {},
-                          child: Text("Add new Tablet"),
+                          child: Text("New Tablet"),
                         ),
                       ],
                     ),

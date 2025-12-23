@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget{
     bool isTokenValid = token != null && !JwtDecoder.isExpired(token!);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(useMaterial3: true),
+      
       home: isTokenValid?Homepage():Loginpage(),
     );
     

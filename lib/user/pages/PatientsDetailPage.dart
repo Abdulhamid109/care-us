@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:careus/constants/domain.dart';
 import 'package:careus/models/patientModal.dart';
 import 'package:careus/widgets/CustomAppbar.dart';
 import 'package:careus/widgets/CustomDrawer.dart';
@@ -37,16 +38,32 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
     }
   }
 
-
-  Future<void>getMedicalReports()async{
+  List<Patient> mypatients = [];
+  
+  
+  Future<void>getMedicalTablets()async{
     try {
-      
+      final response = await http.get(Uri.parse("$localhost/api/getPatientTablet/${widget.pid}"));
+      if(response.statusCode==200){
+        print("Data : ${response.body}");
+        final jsonData = jsonDecode(response.body);
+        List<dynamic> patients = jsonData["patients"];
+        setState(() {
+          mypatients = patients.map((patient)=>Patient.fromJson(patient)).toList();
+        });
+      }else{
+        print("Something went wrong at ${response.statusCode} with response ${response.body}");
+      }
     } catch (e) {
       print("Failed to perform the functionality $e");
     }
   }
 
-
+@override
+  void initState() {
+    super.initState();
+    getMedicalTablets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -277,9 +294,15 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                       const SizedBox(height: 12),
                       const Divider(),
                       const SizedBox(height: 12),
-
+              
                       // First Medical History Card
-                      Card(
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: mypatients.length,
+                        itemBuilder: (context, index) {
+                          final data = mypatients[index];
+                        return Card(
                         elevation: 2,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -299,7 +322,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Blood Sugar",
+                                "",
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w400,
@@ -308,14 +331,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                               const SizedBox(height: 12),
                               const Divider(),
                               const SizedBox(height: 8),
-                              Text(
-                                "Tablet Information:",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.blueGrey[800],
-                                ),
-                              ),
+                              
                               Text(
                                 "Tablet Information:",
                                 style: TextStyle(
@@ -415,7 +431,7 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                   ],
                                 ),
                               ),
-
+                      
                               const Divider(),
                               const SizedBox(height: 8),
                               Text(
@@ -426,9 +442,9 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                   color: Colors.blueGrey[800],
                                 ),
                               ),
-
+                      
                               const SizedBox(height: 8),
-
+                      
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 4.0,
@@ -521,15 +537,19 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                             ],
                           ),
                         ),
-                      ),
-
+                      );
+                      
+                      },),
                       SizedBox(height: height * 0.02),
-
+              
                       // Second Medical History Card
                     ],
                   ),
                 ),
+              
               ),
+            
+              //Reports Card
             ],
           ),
         ),
