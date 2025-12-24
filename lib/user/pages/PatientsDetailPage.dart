@@ -554,7 +554,72 @@ class _PatientsdetailpageState extends State<Patientsdetailpage> {
                                       ),
                                       
                                   onPressed: (){
-                                    
+                                    showDialog(
+                                      context: context,
+                                       builder: (context) {
+                                         return AlertDialog(
+                                          title: Text("Edit your data"),
+                                          content: Padding(
+                                            padding: EdgeInsetsGeometry.all(8),
+                                            child: Column(
+                                              children: [
+                                                TextField(
+                                                  decoration: InputDecoration(
+                                                    labelText: "Illness Type"
+                                                  ),
+                                                ),
+                                                SizedBox(height: height*0.01,),
+                                                TextField(
+                                                  decoration: InputDecoration(
+                                                    labelText: "Tablet Name"
+                                                  ),
+                                                ),
+                                                SizedBox(height: height*0.01,),
+                                                TextField(
+                                                  decoration: InputDecoration(
+                                                    labelText: "Tablet Frequency"
+                                                  ),
+                                                ),
+                                                SizedBox(height: height*0.01,),
+                                                TextField(
+                                                  decoration: InputDecoration(
+                                                    labelText: "Course duration"
+                                                  ),
+                                                ),
+                                                SizedBox(height: height*0.01,),
+                                                TextField(
+                                                  decoration: InputDecoration(
+                                                    labelText: "Slot Section"
+                                                  ),
+                                                ),
+                                                SizedBox(height: height*0.01,),
+                                                TextField(
+                                                  decoration: InputDecoration(
+                                                    labelText: "Start time"
+                                                  ),
+                                                ),
+                                                SizedBox(height: height*0.01,),
+                                                TextField(
+                                                  decoration: InputDecoration(
+                                                    labelText: "End time"
+                                                  ),
+                                                ),
+                                                SizedBox(height: height*0.02,),
+                                                
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                  children: [
+                                                    ElevatedButton(onPressed: (){}, child: Text("update")),
+                                                    ElevatedButton(onPressed: ()=>Navigator.pop(context), child: Text("cancel"))
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                            ),
+
+                                         );
+                                       },
+                                       );
                                   }, 
                                   child: Text("Edit",style: TextStyle(color: Colors.white),)
                                   ),
