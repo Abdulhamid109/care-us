@@ -1,40 +1,60 @@
-class Tabletsmodal {
+class Tablet {
   final String id;
   final String guardianId;
   final String patientId;
-  final String TabletName;
   final String illnessType;
-  final String tabletFrequencey;
-  final String CourseDuration;
-  final String SlotType;
-  final String StartTime;
-  final String EndTime;
+  final String tabletName;
+  final String tabletFrequency;
+  final String courseDuration;
+  final Slot morningSlot;
+  final Slot afternoonSlot;
+  final Slot eveningSlot;
 
-  const Tabletsmodal({
+  Tablet({
     required this.id,
-    required this.TabletName,
     required this.guardianId,
     required this.patientId,
     required this.illnessType,
-    required this.tabletFrequencey,
-    required this.CourseDuration,
-    required this.SlotType,
-    required this.StartTime,
-    required this.EndTime,
+    required this.tabletName,
+    required this.tabletFrequency,
+    required this.courseDuration,
+    required this.morningSlot,
+    required this.afternoonSlot,
+    required this.eveningSlot,
   });
 
-  factory Tabletsmodal.fromJson(Map<String, dynamic> json) {
-    return Tabletsmodal(
-      id: json["_id"],
-      TabletName: json["tabletName"] ?? "",
-      guardianId: json["guardianId"] ?? "",
-      patientId: json["patientId"] ?? "",
-      illnessType: json["illnessType"] ?? "",
-      tabletFrequencey: json["tabletFrequencey"] ?? "",
-      CourseDuration: json["CourseDuration"] ?? "",
-      SlotType: json["SlotType"] ?? "",
-      StartTime: json["SlotStartTime"] ?? "",
-      EndTime: json["SlotEndTime"] ?? "",
+  factory Tablet.fromJson(Map<String, dynamic> json) {
+    return Tablet(
+      id: json['_id'] ?? '',
+      guardianId: json['guardianId'] ?? '',
+      patientId: json['patientId'] ?? '',
+      illnessType: json['illnessType'] ?? '',
+      tabletName: json['tabletName'] ?? '',
+      tabletFrequency: json['tabletFrequencey'] ?? '', // Note: Typo in schema ("tabletFrequencey")
+      courseDuration: json['CourseDuration'] ?? '', // Note: PascalCase in schema
+      morningSlot: Slot.fromJson(json['MorningSlot'] ?? {}),
+      afternoonSlot: Slot.fromJson(json['AfternoonSlot'] ?? {}),
+      eveningSlot: Slot.fromJson(json['EveningSlot'] ?? {}),
+    );
+  }
+}
+
+class Slot {
+  final bool slotSelected;
+  final String slotStartTime;
+  final String slotEndTime;
+
+  Slot({
+    required this.slotSelected,
+    required this.slotStartTime,
+    required this.slotEndTime,
+  });
+
+  factory Slot.fromJson(Map<String, dynamic> json) {
+    return Slot(
+      slotSelected: json['SlotSelected'] ?? false,
+      slotStartTime: json['SlotStartTime'] ?? '',
+      slotEndTime: json['SlotEndTime'] ?? '',
     );
   }
 }

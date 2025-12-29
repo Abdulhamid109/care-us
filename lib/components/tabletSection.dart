@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:careus/constants/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -13,7 +14,6 @@ class Tabletsection extends StatefulWidget {
 }
 
 class _TabletsectionState extends State<Tabletsection> {
-  String? selectedValue = 'morning';
   String? SlotStartTimeSelected = '';
   String? SlotendTimeSelected = '';
   TimeOfDay? stTime; //this haven't used yet
@@ -22,6 +22,21 @@ class _TabletsectionState extends State<Tabletsection> {
   TextEditingController tabletName = TextEditingController();
   TextEditingController tabletfrequency = TextEditingController();
   TextEditingController courseDuration = TextEditingController();
+  //for morning slot
+  String? MorningSlot = 'Morning';
+  bool? morningSlotSelected = false;
+  String? MorningSlotStartTime = '';
+  String? MorningSlotEndTime = '';
+  //for afternoon slot
+  String? AfternoonSlot = 'Afternoon';
+  bool? AfternoonSlotSelected = false;
+  String? AfternoonSlotStartTime;
+  String? AfternoonSlotEndTime;
+  //for evening slot
+  String? EveningSlot = 'Evening';
+  bool? EveningSlotSelected = false;
+  String? EveningSlotStartTime;
+  String? EveningSlotEndTime;
 
   Future<void> addTabletDetails() async {
     try {
@@ -30,17 +45,32 @@ class _TabletsectionState extends State<Tabletsection> {
       final data = JwtDecoder.decode(token!);
       final pid = await pref.getString("pid");
       //redefining the logic for slot st. time and slot end time
-      print("s1 =>${data["uid"]}");
-      print("s2 =>${pid}");
-      print("s1 =>${data["uid"]}");
-      print("s1 =>${data["uid"]}");
-      print("s1 =>${data["uid"]}");
-      print("s1 =>${data["uid"]}");
-      print("s1 =>${data["uid"]}");
-      print("s1 =>${data["uid"]}");
-      print("s1 =>${data["uid"]}");
+      print("Request Body:"); // Debug: Log the request body
+      print({
+        'guardianId': data["uid"],
+        'patientId': pid,
+        'illnessType': illnessController.text.toString(),
+        'tabletName': tabletName.text.toString(),
+        'tabletFrequencey': tabletfrequency.text.toString(),
+        'CourseDuration': courseDuration.text.toString(),
+        'MorningSlot': {
+          'SlotSelected': morningSlotSelected,
+          'SlotStartTime': MorningSlotStartTime,
+          'SlotEndTime': MorningSlotEndTime,
+        },
+        'AfternoonSlot': {
+          'SlotSelected': AfternoonSlotSelected,
+          'SlotStartTime': AfternoonSlotStartTime,
+          'SlotEndTime': AfternoonSlotEndTime,
+        },
+        'EveningSlot': {
+          'SlotSelected': EveningSlotSelected,
+          'SlotStartTime': EveningSlotStartTime,
+          'SlotEndTime': EveningSlotEndTime,
+        },
+      });
       final response = await http.post(
-        Uri.parse("http://localhost:3000/api/addtablets"),
+        Uri.parse("$localhost/api/addtablets"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'guardianId': data["uid"],
@@ -49,9 +79,22 @@ class _TabletsectionState extends State<Tabletsection> {
           'tabletName': tabletName.text.toString(),
           'tabletFrequencey': tabletfrequency.text.toString(),
           'CourseDuration': courseDuration.text.toString(),
-          'SlotType': selectedValue!,
-          'SlotStartTime': SlotStartTimeSelected!,
-          'SlotEndTime': SlotendTimeSelected!,
+          // 'SlotType': selectedValue!,
+          'MorningSlot': {
+            'SlotSelected': morningSlotSelected,
+            'SlotStartTime': MorningSlotStartTime,
+            'SlotEndTime': MorningSlotEndTime,
+          },
+          'AfternoonSlot': {
+            'SlotSelected': AfternoonSlotSelected,
+            'SlotStartTime': AfternoonSlotStartTime,
+            'SlotEndTime': AfternoonSlotEndTime,
+          },
+          'EveningSlot': {
+            'SlotSelected': EveningSlotSelected,
+            'SlotStartTime': EveningSlotStartTime,
+            'SlotEndTime': EveningSlotEndTime,
+          },
         }),
       );
 
@@ -66,7 +109,7 @@ class _TabletsectionState extends State<Tabletsection> {
           tabletName.clear();
           tabletfrequency.clear();
           courseDuration.clear();
-          selectedValue = 'Morning';
+          // selectedValue = 'Morning';
           SlotStartTimeSelected = '';
           SlotendTimeSelected = '';
         });
@@ -197,95 +240,285 @@ class _TabletsectionState extends State<Tabletsection> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
-                  Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    child: DropdownButton(
-                      barrierDismissible: true,
-                      hint: Text("Select the Slot"),
-                      value: selectedValue,
-                      items: [
-                        DropdownMenuItem(
-                          value: "morning",
-                          child: Text("Morning"),
+                  ListTile(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Morning Slot",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
                         ),
-                        DropdownMenuItem(
-                          value: "afternoon",
-                          child: Text("Afternoon"),
-                        ),
-                        DropdownMenuItem(
-                          value: "evening",
-                          child: Text("Evening"),
+
+                        Checkbox(
+                          value: morningSlotSelected,
+                          onChanged: (bool? v) {
+                            setState(() {
+                              morningSlotSelected = v;
+                            });
+                          },
                         ),
                       ],
-                      onChanged: (String? value) {
-                        print("Value => ${value}");
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
+                    ),
+                    subtitle: Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: Colors.greenAccent,
+                            ),
+                            onPressed: () async {
+                              TimeOfDay? pickedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              );
+                              if (pickedTime != null) {
+                                print(
+                                  "Selected time: ${pickedTime.format(context)}",
+                                );
+                                setState(() {
+                                  MorningSlotStartTime = pickedTime.format(
+                                    context,
+                                  );
+                                });
+                              }
+                            },
+                            child: Text(
+                              "Start Time ${MorningSlotStartTime ?? ""}",
+                            ),
+                          ),
+                          // Note: For Course duration make sure you start from todays date till the end of the course duration
+                          SizedBox(width: 5),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: Colors.greenAccent,
+                            ),
+                            onPressed: () async {
+                              TimeOfDay? pickedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay(
+                                  hour: TimeOfDay.now().hour + 4,
+                                  minute: 0,
+                                ),
+                              );
+                              if (pickedTime != null) {
+                                print(
+                                  "Selected time: ${pickedTime.format(context)}",
+                                );
+                                setState(() {
+                                  MorningSlotEndTime = pickedTime.format(
+                                    context,
+                                  );
+                                });
+                              }
+                            },
+                            child: Text("End Time ${MorningSlotEndTime ?? ""}"),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
+                  SizedBox(height: height * 0.02),
+                  ListTile(
+                    title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: BeveledRectangleBorder(),
-                            backgroundColor: Colors.greenAccent,
-                          ),
-                          onPressed: () async {
-                            TimeOfDay? pickedTime = await showTimePicker(
-                              context: context,
-                              initialTime: TimeOfDay.now(),
-                            );
-                            if (pickedTime != null) {
-                              print(
-                                "Selected time: ${pickedTime.format(context)}",
-                              );
-                              setState(() {
-                                SlotStartTimeSelected = pickedTime.format(
-                                  context,
-                                );
-                              });
-                            }
-                          },
-                          child: Text(
-                            "Start Time ${SlotStartTimeSelected ?? ""}",
+                        Text(
+                          "Afternoon Slot",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
                           ),
                         ),
 
-                        // Note: For Course duration make sure you start from todays date till the end of the course duration
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: BeveledRectangleBorder(),
-                            backgroundColor: Colors.greenAccent,
-                          ),
-                          onPressed: () async {
-                            TimeOfDay? pickedTime = await showTimePicker(
-                              context: context,
-                              initialTime: TimeOfDay(
-                                hour: TimeOfDay.now().hour + 4,
-                                minute: 0,
-                              ),
-                            );
-                            if (pickedTime != null) {
-                              print(
-                                "Selected time: ${pickedTime.format(context)}",
-                              );
-                              setState(() {
-                                SlotendTimeSelected = pickedTime.format(
-                                  context,
-                                );
-                              });
-                            }
+                        Checkbox(
+                          value: AfternoonSlotSelected,
+                          onChanged: (bool? v) {
+                            setState(() {
+                              AfternoonSlotSelected = v;
+                            });
+                            print(v);
                           },
-                          child: Text("End Time ${SlotendTimeSelected ?? ""}"),
                         ),
                       ],
+                    ),
+                    subtitle: Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: Colors.greenAccent,
+                            ),
+                            onPressed: () async {
+                              TimeOfDay? pickedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              );
+                              if (pickedTime != null) {
+                                print(
+                                  "Selected time: ${pickedTime.format(context)}",
+                                );
+                                setState(() {
+                                  AfternoonSlotStartTime = pickedTime.format(
+                                    context,
+                                  );
+                                });
+                              }
+                            },
+                            child: Text(
+                              "Start Time ${AfternoonSlotStartTime ?? ""}",
+                            ),
+                          ),
+                          // Note: For Course duration make sure you start from todays date till the end of the course duration
+                          SizedBox(width: 5),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: Colors.greenAccent,
+                            ),
+                            onPressed: () async {
+                              TimeOfDay? pickedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay(
+                                  hour: TimeOfDay.now().hour + 4,
+                                  minute: 0,
+                                ),
+                              );
+                              if (pickedTime != null) {
+                                print(
+                                  "Selected time: ${pickedTime.format(context)}",
+                                );
+                                setState(() {
+                                  AfternoonSlotEndTime = pickedTime.format(
+                                    context,
+                                  );
+                                });
+                              }
+                            },
+                            child: Text(
+                              "End Time ${AfternoonSlotEndTime ?? ""}",
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: height * 0.02),
+                  ListTile(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Evening Slot",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+
+                        Checkbox(
+                          value: EveningSlotSelected,
+                          onChanged: (bool? v) {
+                            setState(() {
+                              EveningSlotSelected = v;
+                            });
+                            print(v);
+                          },
+                        ),
+                      ],
+                    ),
+                    subtitle: Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: Colors.greenAccent,
+                            ),
+                            onPressed: () async {
+                              TimeOfDay? pickedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              );
+                              if (pickedTime != null) {
+                                print(
+                                  "Selected time: ${pickedTime.format(context)}",
+                                );
+                                setState(() {
+                                  EveningSlotStartTime = pickedTime.format(
+                                    context,
+                                  );
+                                });
+                              }
+                            },
+                            child: Text(
+                              "Start Time ${EveningSlotStartTime ?? ""}",
+                            ),
+                          ),
+                          // Note: For Course duration make sure you start from todays date till the end of the course duration
+                          SizedBox(width: 5),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: Colors.greenAccent,
+                            ),
+                            onPressed: () async {
+                              TimeOfDay? pickedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay(
+                                  hour: TimeOfDay.now().hour + 4,
+                                  minute: 0,
+                                ),
+                              );
+                              if (pickedTime != null) {
+                                print(
+                                  "Selected time: ${pickedTime.format(context)}",
+                                );
+                                setState(() {
+                                  EveningSlotEndTime = pickedTime.format(
+                                    context,
+                                  );
+                                });
+                              }
+                            },
+                            child: Text("End Time ${EveningSlotEndTime ?? ""}"),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -298,6 +531,65 @@ class _TabletsectionState extends State<Tabletsection> {
                           onPressed: () {
                             //start time and end time difference should not more than 4 hours
                             // do consider that after 12:00 am and before 6:00 am the user cannot add any tablet remider
+
+                            if (tabletName.text.isEmpty ||
+                                tabletfrequency.text.isEmpty ||
+                                illnessController.text.isEmpty ||
+                                courseDuration.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text("Enter the respective data"),
+                                ),
+                              );
+                            } else if (!morningSlotSelected! ||
+                                !AfternoonSlotSelected! ||
+                                !EveningSlotSelected!) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text("Select the respective slots"),
+                                ),
+                              );
+                            } else if (morningSlotSelected! &&
+                                (MorningSlotStartTime!.isEmpty ||
+                                    MorningSlotEndTime!.isEmpty)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    "Select the respective morning slot timing",
+                                  ),
+                                ),
+                              );
+                            } else if (AfternoonSlotSelected! &&
+                                (AfternoonSlotStartTime!.isEmpty ||
+                                    AfternoonSlotEndTime!.isEmpty)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    "Select the respective afternoon slot timing",
+                                  ),
+                                ),
+                              );
+                            } else if (EveningSlotSelected! &&
+                                (EveningSlotStartTime!.isEmpty ||
+                                    EveningSlotEndTime!.isEmpty)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    "Select the respective evening slot timing",
+                                  ),
+                                ),
+                              );
+                            } else if (MorningSlotStartTime!.contains("PM") &&
+                                MorningSlotEndTime!.contains("PM")) {
+                              print(
+                                "kindly check the PM/AM for the selected time",
+                              );
+                            } else {}
                             addTabletDetails();
                           },
                           child: Text("Save"),
