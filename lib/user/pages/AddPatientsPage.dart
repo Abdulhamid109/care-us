@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:careus/components/personalInfo.dart';
 import 'package:careus/components/reportsSection.dart';
 import 'package:careus/components/tabletSection.dart';
+import 'package:careus/constants/domain.dart';
 import 'package:careus/user/pages/Homepage.dart';
 import 'package:careus/widgets/CustomAppbar.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 class Addpatientspage extends StatefulWidget {
@@ -52,6 +55,25 @@ class _AddpatientspageState extends State<Addpatientspage> {
     }
   }
 
+    Future callInstantiate() async {
+    try {
+      final response = await http.post(
+        Uri.parse("$localhost/api/ivr/makecall"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'phoneNumber': "+919860573041"}),
+      );
+
+      if (response.statusCode == 200) {
+        print("Response => ${response.body}");
+      } else {
+        print(
+          "Error at response code ${response.statusCode} with response body ${response.body}",
+        );
+      }
+    } catch (e) {
+      print("Failed to perform the functionality => $e");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height * 1;
@@ -95,20 +117,22 @@ class _AddpatientspageState extends State<Addpatientspage> {
               ElevatedButton(
                 onPressed: currentStep < 2
                     ? details.onStepContinue
-                    : () {
+                    : () async{
+
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              "Data submitted successfully ..Navigating to homepage..",
+                              "Data submitted successfully ..",
                             ),
                           ),
                         );
-                        Future.delayed(Duration(seconds: 2), () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => Homepage()),
-                          );
-                        });
+                        await callInstantiate();
+                        // Future.delayed(Duration(seconds: 2), () {
+                        //   Navigator.pushReplacement(
+                        //     context,
+                        //     MaterialPageRoute(builder: (context) => Homepage()),
+                        //   );
+                        // });
                       },
                 child: Text(currentStep < 2 ? "continue" : "Done"),
               ),
