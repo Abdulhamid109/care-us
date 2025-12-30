@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:careus/constants/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -100,18 +101,30 @@ class _TabletsectionState extends State<Tabletsection> {
 
       if (response.statusCode == 200) {
         print("Successfully added the tablets ${response.body}");
-        Future.delayed(Duration(seconds: 3), () {
-          ScaffoldMessenger.of(context).showSnackBar(
+         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Fields get cleared after 3 sections")),
           );
+        Future.delayed(Duration(seconds: 3), () {
+         
 
           illnessController.clear();
           tabletName.clear();
           tabletfrequency.clear();
           courseDuration.clear();
           // selectedValue = 'Morning';
-          SlotStartTimeSelected = '';
-          SlotendTimeSelected = '';
+          morningSlotSelected = false;
+          AfternoonSlotSelected = false;
+          EveningSlotSelected=false;
+
+          MorningSlotStartTime='';
+          MorningSlotEndTime='';
+
+          AfternoonSlotStartTime = '';
+          AfternoonSlotEndTime = '';
+
+          EveningSlotStartTime = '';
+          EveningSlotEndTime = '';
+
         });
       } else {
         print(
@@ -122,8 +135,6 @@ class _TabletsectionState extends State<Tabletsection> {
       print("Failed to perform the functionality ${e}");
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -531,75 +542,427 @@ class _TabletsectionState extends State<Tabletsection> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            //start time and end time difference should not more than 4 hours
-                            // do consider that after 12:00 am and before 6:00 am the user cannot add any tablet remider
-
+                            // Check if required fields are empty
                             if (tabletName.text.isEmpty ||
                                 tabletfrequency.text.isEmpty ||
                                 illnessController.text.isEmpty ||
                                 courseDuration.text.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   backgroundColor: Colors.red,
-                                  content: Text("Enter the respective data"),
+                                  content: Text(
+                                    "Please fill in all required fields",
+                                  ),
                                 ),
                               );
-                            } else if (!morningSlotSelected! ||
-                                !AfternoonSlotSelected! ||
+                              return;
+                            }
+
+                            // Check if at least one slot is selected
+                            if (!morningSlotSelected! &&
+                                !AfternoonSlotSelected! &&
                                 !EveningSlotSelected!) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Colors.red,
-                                  content: Text("Select the respective slots"),
-                                ),
-                              );
-                            } else if (morningSlotSelected! &&
-                                (MorningSlotStartTime!.isEmpty ||
-                                    MorningSlotEndTime!.isEmpty)) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   backgroundColor: Colors.red,
                                   content: Text(
-                                    "Select the respective morning slot timing",
+                                    "Please select at least one slot",
                                   ),
                                 ),
                               );
-                            } else if (AfternoonSlotSelected! &&
-                                (AfternoonSlotStartTime!.isEmpty ||
-                                    AfternoonSlotEndTime!.isEmpty)) {
+                              return;
+                            }
+
+                            // Helper function to parse time string to DateTime
+                            DateTime? parseTime(String time) {
+                              try {
+                                return DateFormat("h:mm a").parse(time);
+                              } catch (e) {
+                                return null;
+                              }
+                            }
+
+                            // Helper function to check if time is within a specific range
+                            bool isTimeInRange(
+                              DateTime time,
+                              DateTime start,
+                              DateTime end,
+                            ) {
+                              return time.isAfter(start) && time.isBefore(end);
+                            }
+
+                            // Helper function to calculate time difference in hours
+                            double calculateTimeDifference(
+                              String startTime,
+                              String endTime,
+                            ) {
+                              try {
+                                final format = DateFormat("h:mm a");
+                                final start = format.parse(startTime);
+                                final end = format.parse(endTime);
+                                return end.difference(start).inHours.toDouble();
+                              } catch (e) {
+                                return 5; // Return a value > 4 to trigger the error
+                              }
+                            }
+
+                            // Define time ranges for slots
+                            final morningStart = DateFormat(
+                              "h:mm a",
+                            ).parse("6:00 AM");
+                            final morningEnd = DateFormat(
+                              "h:mm a",
+                            ).parse("11:59 AM");
+                            final afternoonStart = DateFormat(
+                              "h:mm a",
+                            ).parse("12:00 PM");
+                            final afternoonEnd = DateFormat(
+                              "h:mm a",
+                            ).parse("5:59 PM");
+                            final eveningStart = DateFormat(
+                              "h:mm a",
+                            ).parse("6:00 PM");
+                            final eveningEnd = DateFormat(
+                              "h:mm a",
+                            ).parse("11:59 PM");
+                            final restrictedStart = DateFormat(
+                              "h:mm a",
+                            ).parse("12:00 AM");
+                            final restrictedEnd = DateFormat(
+                              "h:mm a",
+                            ).parse("6:00 AM");
+
+                            // Check morning slot
+                            if (morningSlotSelected!) {
+                              if (MorningSlotStartTime!.isEmpty ||
+                                  MorningSlotEndTime!.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Please enter start and end times for the morning slot",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              final startTime = parseTime(
+                                MorningSlotStartTime!,
+                              );
+                              final endTime = parseTime(MorningSlotEndTime!);
+
+                              if (startTime == null || endTime == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Invalid time format for morning slot",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if time is in restricted period (12 AM - 6 AM)
+                              if (isTimeInRange(
+                                    startTime,
+                                    restrictedStart,
+                                    restrictedEnd,
+                                  ) ||
+                                  isTimeInRange(
+                                    endTime,
+                                    restrictedStart,
+                                    restrictedEnd,
+                                  )) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Reminders cannot be set between 12:00 AM and 6:00 AM",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if time is within morning slot range (6 AM - 11:59 AM)
+                              if (!isTimeInRange(
+                                    startTime,
+                                    morningStart,
+                                    morningEnd,
+                                  ) ||
+                                  !isTimeInRange(
+                                    endTime,
+                                    morningStart,
+                                    morningEnd,
+                                  )) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Morning slot must be between 6:00 AM and 11:59 AM",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if duration exceeds 4 hours
+                              if (calculateTimeDifference(
+                                    MorningSlotStartTime!,
+                                    MorningSlotEndTime!,
+                                  ) >
+                                  4) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Morning slot duration cannot exceed 4 hours",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                            }
+
+                            // Check afternoon slot
+                            if (AfternoonSlotSelected!) {
+                              if (AfternoonSlotStartTime!.isEmpty ||
+                                  AfternoonSlotEndTime!.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Please enter start and end times for the afternoon slot",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              final startTime = parseTime(
+                                AfternoonSlotStartTime!,
+                              );
+                              final endTime = parseTime(AfternoonSlotEndTime!);
+
+                              if (startTime == null || endTime == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Invalid time format for afternoon slot",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if time is in restricted period (12 AM - 6 AM)
+                              if (isTimeInRange(
+                                    startTime,
+                                    restrictedStart,
+                                    restrictedEnd,
+                                  ) ||
+                                  isTimeInRange(
+                                    endTime,
+                                    restrictedStart,
+                                    restrictedEnd,
+                                  )) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Reminders cannot be set between 12:00 AM and 6:00 AM",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if time is within afternoon slot range (12 PM - 5:59 PM)
+                              if (!isTimeInRange(
+                                    startTime,
+                                    afternoonStart,
+                                    afternoonEnd,
+                                  ) ||
+                                  !isTimeInRange(
+                                    endTime,
+                                    afternoonStart,
+                                    afternoonEnd,
+                                  )) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Afternoon slot must be between 12:00 PM and 5:59 PM",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if duration exceeds 4 hours
+                              if (calculateTimeDifference(
+                                    AfternoonSlotStartTime!,
+                                    AfternoonSlotEndTime!,
+                                  ) >
+                                  4) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Afternoon slot duration cannot exceed 4 hours",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                            }
+
+                            // Check evening slot
+                            if (EveningSlotSelected!) {
+                              if (EveningSlotStartTime!.isEmpty ||
+                                  EveningSlotEndTime!.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Please enter start and end times for the evening slot",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              final startTime = parseTime(
+                                EveningSlotStartTime!,
+                              );
+                              final endTime = parseTime(EveningSlotEndTime!);
+
+                              if (startTime == null || endTime == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Invalid time format for evening slot",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if time is in restricted period (12 AM - 6 AM)
+                              if (isTimeInRange(
+                                    startTime,
+                                    restrictedStart,
+                                    restrictedEnd,
+                                  ) ||
+                                  isTimeInRange(
+                                    endTime,
+                                    restrictedStart,
+                                    restrictedEnd,
+                                  )) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Reminders cannot be set between 12:00 AM and 6:00 AM",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if time is within evening slot range (6 PM - 11:59 PM)
+                              if (!isTimeInRange(
+                                    startTime,
+                                    eveningStart,
+                                    eveningEnd,
+                                  ) ||
+                                  !isTimeInRange(
+                                    endTime,
+                                    eveningStart,
+                                    eveningEnd,
+                                  )) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Evening slot must be between 6:00 PM and 11:59 PM",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Check if duration exceeds 4 hours
+                              if (calculateTimeDifference(
+                                    EveningSlotStartTime!,
+                                    EveningSlotEndTime!,
+                                  ) >
+                                  4) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      "Evening slot duration cannot exceed 4 hours",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                            }
+                            final tabfreq = int.tryParse(
+                              tabletfrequency.text.toString(),
+                            );
+                            if (tabfreq! > 3) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   backgroundColor: Colors.red,
                                   content: Text(
-                                    "Select the respective afternoon slot timing",
+                                    "tablet frequency cannot be more than 3",
                                   ),
                                 ),
                               );
-                            } else if (EveningSlotSelected! &&
-                                (EveningSlotStartTime!.isEmpty ||
-                                    EveningSlotEndTime!.isEmpty)) {
+                              return;
+                            }
+                            int slotcount = 0;
+                            if (morningSlotSelected!) {
+                              setState(() {
+                                slotcount++;
+                              });
+                            };
+                            if (AfternoonSlotSelected!) {
+                              setState(() {
+                                slotcount++;
+                              });
+                            };
+                            if (EveningSlotSelected!) {
+                              setState(() {
+                                slotcount++;
+                              });
+                            };
+
+                            if(slotcount!=tabfreq){
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   backgroundColor: Colors.red,
                                   content: Text(
-                                    "Select the respective evening slot timing",
+                                    "tablet frequency and slots selected are not same",
                                   ),
                                 ),
                               );
-                            } else if (MorningSlotStartTime!.contains("PM") &&
-                                MorningSlotEndTime!.contains("PM")) {
-                              print(
-                                "kindly check the PM/AM for the selected time",
-                              );
-                            } else {}
+                              return;
+                            }
+
+                            // If all validations pass, add the tablet details
                             addTabletDetails();
                           },
-                          child: Text("Save"),
+                          child: const Text("Save"),
                         ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: Text("New Tablet"),
-                        ),
+
+                        
                       ],
                     ),
                   ),

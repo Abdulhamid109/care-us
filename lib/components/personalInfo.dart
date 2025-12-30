@@ -95,7 +95,7 @@ class _PersonalinfoState extends State<Personalinfo> {
               shape: BeveledRectangleBorder(),
               content: SizedBox(
                 height: 20,
-                child: Text("Kindly Click on Navigate button for procedding further")),
+                child: Text("Kindly Click on 'Continue' button for further proceding")),
               actions: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
