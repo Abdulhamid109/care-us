@@ -55,7 +55,7 @@ class _AddpatientspageState extends State<Addpatientspage> {
     }
   }
 
-    Future callInstantiate() async {
+  Future callInstantiate() async {
     try {
       final response = await http.post(
         Uri.parse("$localhost/api/ivr/makecall"),
@@ -74,6 +74,7 @@ class _AddpatientspageState extends State<Addpatientspage> {
       print("Failed to perform the functionality => $e");
     }
   }
+  
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height * 1;

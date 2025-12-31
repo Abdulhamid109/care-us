@@ -101,31 +101,30 @@ class _TabletsectionState extends State<Tabletsection> {
 
       if (response.statusCode == 200) {
         print("Successfully added the tablets ${response.body}");
-         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Fields get cleared after 3 sections")),
-          );
-        Future.delayed(Duration(seconds: 3), () {
-         
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Fields get cleared after 3 sections")),
+        );
+        // Future.delayed(Duration(seconds: 3), () {
+        //   illnessController.clear();
+        //   tabletName.clear();
+        //   tabletfrequency.clear();
+        //   courseDuration.clear();
+        //   // selectedValue = 'Morning';
+        //   morningSlotSelected = false;
+        //   AfternoonSlotSelected = false;
+        //   EveningSlotSelected = false;
 
-          illnessController.clear();
-          tabletName.clear();
-          tabletfrequency.clear();
-          courseDuration.clear();
-          // selectedValue = 'Morning';
-          morningSlotSelected = false;
-          AfternoonSlotSelected = false;
-          EveningSlotSelected=false;
+        //   MorningSlotStartTime = '';
+        //   MorningSlotEndTime = '';
 
-          MorningSlotStartTime='';
-          MorningSlotEndTime='';
+        //   AfternoonSlotStartTime = '';
+        //   AfternoonSlotEndTime = '';
 
-          AfternoonSlotStartTime = '';
-          AfternoonSlotEndTime = '';
-
-          EveningSlotStartTime = '';
-          EveningSlotEndTime = '';
-
-        });
+        //   EveningSlotStartTime = '';
+        //   EveningSlotEndTime = '';
+        // });
+        await callInstantiate();
+      
       } else {
         print(
           "Something went wrong statuscode ${response.statusCode} and message ${response.body}",
@@ -133,6 +132,43 @@ class _TabletsectionState extends State<Tabletsection> {
       }
     } catch (e) {
       print("Failed to perform the functionality ${e}");
+    }
+  }
+
+  Future callInstantiate() async {
+    try {
+      final response = await http.post(
+        Uri.parse("$localhost/api/ivr/makecall"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phoneNumber': "+919860573041",
+          'MorningSlot': {
+            'SlotSelected': morningSlotSelected,
+            'SlotStartTime': MorningSlotStartTime,
+            'SlotEndTime': MorningSlotEndTime,
+          },
+          'AfternoonSlot': {
+            'SlotSelected': AfternoonSlotSelected,
+            'SlotStartTime': AfternoonSlotStartTime,
+            'SlotEndTime': AfternoonSlotEndTime,
+          },
+          'EveningSlot': {
+            'SlotSelected': EveningSlotSelected,
+            'SlotStartTime': EveningSlotStartTime,
+            'SlotEndTime': EveningSlotEndTime,
+          },
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Response => ${response.body}");
+      } else {
+        print(
+          "Error at response code ${response.statusCode} with response body ${response.body}",
+        );
+      }
+    } catch (e) {
+      print("Failed to perform the functionality => $e");
     }
   }
 
@@ -541,7 +577,7 @@ class _TabletsectionState extends State<Tabletsection> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async{
                             // Check if required fields are empty
                             if (tabletName.text.isEmpty ||
                                 tabletfrequency.text.isEmpty ||
@@ -932,19 +968,22 @@ class _TabletsectionState extends State<Tabletsection> {
                               setState(() {
                                 slotcount++;
                               });
-                            };
+                            }
+                            ;
                             if (AfternoonSlotSelected!) {
                               setState(() {
                                 slotcount++;
                               });
-                            };
+                            }
+                            ;
                             if (EveningSlotSelected!) {
                               setState(() {
                                 slotcount++;
                               });
-                            };
+                            }
+                            ;
 
-                            if(slotcount!=tabfreq){
+                            if (slotcount != tabfreq) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   backgroundColor: Colors.red,
@@ -957,12 +996,11 @@ class _TabletsectionState extends State<Tabletsection> {
                             }
 
                             // If all validations pass, add the tablet details
-                            addTabletDetails();
+                            await addTabletDetails();
+                            
                           },
                           child: const Text("Save"),
                         ),
-
-                        
                       ],
                     ),
                   ),
