@@ -38,6 +38,7 @@ class _TabletsectionState extends State<Tabletsection> {
   bool? EveningSlotSelected = false;
   String? EveningSlotStartTime;
   String? EveningSlotEndTime;
+  
 
   Future<void> addTabletDetails() async {
     try {
@@ -104,6 +105,9 @@ class _TabletsectionState extends State<Tabletsection> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Fields get cleared after 3 sections")),
         );
+        final jsondata = await jsonDecode(response.body);
+        final tabletdata = jsondata["tablets"];
+        final tabletid = tabletdata["_id"];
         // Future.delayed(Duration(seconds: 3), () {
         //   illnessController.clear();
         //   tabletName.clear();
@@ -123,7 +127,10 @@ class _TabletsectionState extends State<Tabletsection> {
         //   EveningSlotStartTime = '';
         //   EveningSlotEndTime = '';
         // });
-        await callInstantiate();
+        print("8888888888888888888888888888888");
+        print("Tablets id "+tabletid);
+        print("77777777777777777777777777777");
+        await callInstantiate(tabletid);
       
       } else {
         print(
@@ -135,16 +142,21 @@ class _TabletsectionState extends State<Tabletsection> {
     }
   }
 
-  Future callInstantiate() async {
+  Future callInstantiate(String tabletid) async {
     try {
       final pref = await SharedPreferences.getInstance();
+      final token = await pref.getString("token");
+      final tokenData = await JwtDecoder.decode(token!);
+      final uid = await tokenData["uid"];
       final pid = await pref.getString("pid");
       final response = await http.post(
         Uri.parse("$localhost/api/ivr/makecall"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
+          'guardianId': uid,
           'phoneNumber': "+919860573041",
           'pid':pid,
+          'tabletid': tabletid,
           'MorningSlot': {
             'SlotSelected': morningSlotSelected,
             'SlotStartTime': MorningSlotStartTime,
