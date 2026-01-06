@@ -2,6 +2,7 @@ import 'package:careus/user/auth/loginPage.dart';
 import 'package:careus/user/pages/AddPatientsPage.dart';
 import 'package:careus/user/pages/Homepage.dart';
 import 'package:careus/user/pages/Profilepage.dart';
+import 'package:careus/user/pages/RemainderPage.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -96,23 +97,10 @@ class Customdrawer extends StatelessWidget {
 
           SizedBox(height: height * 0.01),
           ListTile(
-            title: Text("Reminder section"),
+            title: Text("Tablet Reminder section"),
             leading: Icon(Icons.lock_clock),
             onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text("List of patients who you have set the remiders for their medicines"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text("Cancel"),
-                      ),
-                    ],
-                  );
-                },
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>Remainderpage()));
             },
           ),
           SizedBox(height: height * 0.01),
