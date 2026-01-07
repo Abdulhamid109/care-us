@@ -43,11 +43,13 @@ class Slot {
   final bool slotSelected;
   final String slotStartTime;
   final String slotEndTime;
+  final bool ScheduleRunning;
 
   Slot({
     required this.slotSelected,
     required this.slotStartTime,
     required this.slotEndTime,
+    required this.ScheduleRunning
   });
 
   factory Slot.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class Slot {
       slotSelected: json['SlotSelected'] ?? false,
       slotStartTime: json['SlotStartTime'] ?? '',
       slotEndTime: json['SlotEndTime'] ?? '',
+      ScheduleRunning: json['ScheduleRunning'] ?? false
     );
   }
 }
