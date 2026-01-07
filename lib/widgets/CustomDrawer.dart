@@ -103,6 +103,28 @@ class Customdrawer extends StatelessWidget {
               Navigator.push(context, MaterialPageRoute(builder: (context)=>Remainderpage()));
             },
           ),
+
+          SizedBox(height: height * 0.01),
+          ListTile(
+            title: Text("Food Guide"),
+            leading: Icon(Icons.outbox_rounded),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("Based on the illness of the particular patient there are 2 ways by which they can determine the health..1.Let AI Completely tell then what should they eat,2.Let the patient tell the AI that he/she wants to eat that thing the ai will be giving the guidance if its safe for eating or not.3.(mostly rare)Upload the pric and based on that let ai understand the pic tell whether the patient should eat or not..."),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("Cancel"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
           SizedBox(height: height * 0.01),
           ListTile(
             title: Text("About us"),

@@ -1,4 +1,14 @@
+import 'dart:convert';
+
+import 'package:careus/constants/domain.dart';
+import 'package:careus/models/patientModal.dart';
+import 'package:careus/models/tabletsModal.dart';
+import 'package:careus/widgets/CustomAppbar.dart';
+import 'package:careus/widgets/CustomDrawer.dart';
 import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class Remainderpage extends StatefulWidget {
   const Remainderpage({super.key});
@@ -8,13 +18,162 @@ class Remainderpage extends StatefulWidget {
 }
 
 class _RemainderpageState extends State<Remainderpage> {
+  //get the list of the patients along with the course duration timeing
+
+  List<Patient> allPatients = [];
+  List<Tablet> patientTablets = [];
+  bool isLoading = true;
+
+  Future<void> AllPatients() async {
+    try {
+      final pref = await SharedPreferences.getInstance();
+      final token = await pref.getString("token");
+      final tokendata = await JwtDecoder.decode(token!);
+      final uid = await tokendata["uid"];
+
+      final response = await http.get(
+        Uri.parse("$localhost/api/getallpatients/$uid"),
+      );
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        print("List of patients whose guradian id is => $uid");
+        print(response.body);
+        List<dynamic> patientsList = jsonData["Patients"];
+
+        print("Result => ${jsonData["Patients"]}");
+
+        setState(() {
+          allPatients = patientsList
+              .map((patient) => Patient.fromJson(patient))
+              .toList();
+          isLoading = false;
+        });
+
+        //here we will be calling the tablets details page
+      } else {
+        print(
+          "Error occured at ${response.statusCode} of body => ${response.body}",
+        );
+      }
+    } catch (e) {
+      print("Failed to perform the funtionality => $e");
+    }
+  }
+
+  //tablets detail of each patient
+
+  Future<List<Tablet>> patientTabletDetails(String pid) async {
+    try {
+      if (pid.isEmpty) {
+        print("The Patient ID is not provided!");
+        return [];
+      }
+      final response = await http.get(
+        Uri.parse("$localhost/api/getPatientTablet/$pid"),
+      );
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        List<dynamic> tabletList = jsonData["patients"];
+        return tabletList.map((tablet) => Tablet.fromJson(tablet)).toList();
+      } else {
+        print("Error occurred at ${response.statusCode}: ${response.body}");
+        throw Exception("Failed to load tablets: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Failed to perform the functionality: $e");
+      throw e;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    AllPatients();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text("Here we will be making the manipulations for course duration ,medicine remainder stuff.."),
-        
+    double height = MediaQuery.of(context).size.height * 1;
+    double width = MediaQuery.of(context).size.width * 1;
+
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(height * 0.08),
+        child: Customappbar(ScreenTitle: "Remainder Section"),
       ),
+      drawer: Customdrawer(),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : allPatients.isEmpty
+          ? Center(child: Text("No Data Available"))
+          : ListView.builder(
+              itemCount: allPatients.length,
+              itemBuilder: (context, index) {
+                final patient = allPatients[index];
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: ListTile(
+                      title: Text("${patient.patientName}",style: TextStyle(fontSize: 23),),
+                      subtitle: Column(
+                        children: [
+                          //use of future builder over here....
+                          FutureBuilder<List<Tablet>>(
+                            future: patientTabletDetails(patient.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Text(
+                                    "Error: ${snapshot.error}",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                );
+                              }
+                              if (snapshot.hasData &&
+                                  snapshot.data!.isNotEmpty) {
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: snapshot.data!.length,
+                                  itemBuilder: (context, i) {
+                                    final tablet = snapshot.data![i];
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text("Tablet Name : ${tablet.tabletName}",style: TextStyle(fontSize: 20),),
+                                        ElevatedButton(onPressed: (){
+                                          showDialog(
+                                            context: context, 
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: Text(tablet.id),
+                                              );
+                                          },);
+                                        }, child: Text("Open"))
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                              return Text("No tablets available");
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
