@@ -43,7 +43,7 @@ class Slot {
   final bool slotSelected;
   final String slotStartTime;
   final String slotEndTime;
-  final bool ScheduleRunning;
+   bool ScheduleRunning;
 
   Slot({
     required this.slotSelected,

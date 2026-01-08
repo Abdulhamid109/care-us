@@ -91,6 +91,141 @@ class _RemainderpageState extends State<Remainderpage> {
     AllPatients();
   }
 
+  //Morning Schedule manipulations
+  Future<bool> StopMorningSchedule(String tid) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$localhost/api/morningjobstop/$tid"),
+      );
+      if (response.statusCode == 200) {
+        print("Response body => ${response.body}");
+        return true;
+      } else {
+        print(
+          "Error occured at ${response.statusCode} with body as ${response.body}",
+        );
+        return false;
+      }
+    } catch (e) {
+      print("Failed to perform the functionaliy => $e");
+      throw e;
+    }
+  }
+
+  Future<bool> startMorningSchedular(String id) async {
+    try {
+      final pref = await SharedPreferences.getInstance();
+      final token = await pref.getString("token");
+      final tokendata = await JwtDecoder.decode(token!);
+      final uid = tokendata["uid"];
+      final response = await http.put(
+        Uri.parse("$localhost/api/morningjobstart/$id/$uid"),
+      );
+      if (response.statusCode == 200) {
+        print("Response body => ${response.body}");
+        return true;
+      } else {
+        print(
+          "Error occured : Status-Code ${response.statusCode} with body => ${response.body}",
+        );
+        return false;
+      }
+    } catch (e) {
+      print("Failed to perform the functionality => $e");
+      throw e;
+    }
+  }
+
+  //Afternoon Schedule manipulations
+  Future<bool> stopAfternoonSchedule(String tid) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$localhost/api/afternoonjobstop/$tid"),
+      );
+      if (response.statusCode == 200) {
+        print("Response body => ${response.body}");
+        return true;
+      } else {
+        print(
+          "Error occured at ${response.statusCode} with body as ${response.body}",
+        );
+        return false;
+      }
+    } catch (e) {
+      print("Failed to perform the functionaliy => $e");
+      throw e;
+    }
+  }
+
+  Future<bool> startAfternoonSchedular(String id) async {
+    try {
+      final pref = await SharedPreferences.getInstance();
+      final token = await pref.getString("token");
+      final tokendata = await JwtDecoder.decode(token!);
+      final uid = tokendata["uid"];
+      final response = await http.put(
+        Uri.parse("$localhost/api/afternoonjobstop/$id/$uid"),
+      );
+      if (response.statusCode == 200) {
+        print("Response body => ${response.body}");
+        return true;
+      } else {
+        print(
+          "Error occured : Status-Code ${response.statusCode} with body => ${response.body}",
+        );
+        return false;
+      }
+    } catch (e) {
+      print("Failed to perform the functionality => $e");
+      throw e;
+    }
+  }
+
+  //Evening Schedule manipulations
+  Future<bool> stopEveningSchedule(String tid) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$localhost/api/eveningjobstop/$tid"),
+      );
+      if (response.statusCode == 200) {
+        print("Response body => ${response.body}");
+        return true;
+      } else {
+        print(
+          "Error occured at ${response.statusCode} with body as ${response.body}",
+        );
+        return false;
+      }
+    } catch (e) {
+      print("Failed to perform the functionaliy => $e");
+      throw e;
+    }
+  }
+
+  Future<bool> startEveningSchedular(String id) async {
+    try {
+      final pref = await SharedPreferences.getInstance();
+      final token = await pref.getString("token");
+      final tokendata = await JwtDecoder.decode(token!);
+      final uid = tokendata["uid"];
+      final response = await http.put(
+        Uri.parse("$localhost/api/eveningjobstop/$id/$uid"),
+      );
+      if (response.statusCode == 200) {
+        print("Response body => ${response.body}");
+        return true;
+      } else {
+        print(
+          "Error occured : Status-Code ${response.statusCode} with body => ${response.body}",
+        );
+        return false;
+      }
+    } catch (e) {
+      print("Failed to perform the functionality => $e");
+      throw e;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height * 1;
@@ -114,7 +249,10 @@ class _RemainderpageState extends State<Remainderpage> {
                   padding: const EdgeInsets.all(8.0),
                   child: Card(
                     child: ListTile(
-                      title: Text("${patient.patientName}",style: TextStyle(fontSize: 23),),
+                      title: Text(
+                        "${patient.patientName}",
+                        style: TextStyle(fontSize: 23),
+                      ),
                       subtitle: Column(
                         children: [
                           //use of future builder over here....
@@ -142,88 +280,506 @@ class _RemainderpageState extends State<Remainderpage> {
                                   itemCount: snapshot.data!.length,
                                   itemBuilder: (context, i) {
                                     final tablet = snapshot.data![i];
-                                    return Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text("Tablet Name : ${tablet.tabletName}",style: TextStyle(fontSize: 17,fontWeight: FontWeight.w300),),
-                                        ElevatedButton(onPressed: (){
-                                          
-                                          showDialog(
-                                            context: context, 
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                scrollable: true,
-                                                title: Text(tablet.tabletName),
-                                                content: SizedBox(
-                                                  height: height*0.7,
-                                                  child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text("Tablet Frequency : ${tablet.tabletFrequency}"),
-                                                      SizedBox(height: height*0.01,),
-                                                      Text("Duration : ${tablet.courseDuration}"),
-                                                      SizedBox(height: height*0.01,),
-                                                      Text("Slots Running",style: TextStyle(fontSize: 18,color: Colors.blue),),
-                                                      SizedBox(height: height*0.01,),
-                                                      tablet.morningSlot.slotSelected
-                                                      ?tablet.morningSlot.ScheduleRunning
-                                                      ?Container(
-                                                        decoration: BoxDecoration(
-                                                          border: Border.all(),
-                                                          borderRadius: BorderRadius.circular(10)
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Tablet Name : ${tablet.tabletName}",
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w300,
+                                            ),
+                                          ),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.blue,
+                                            ),
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return AlertDialog(
+                                                    scrollable: true,
+                                                    title: Text(
+                                                      tablet.tabletName,
+                                                    ),
+                                                    content: SizedBox(
+                                                      height: height * 0.7,
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            "Tablet Frequency : ${tablet.tabletFrequency}",
                                                           ),
-                                                        child: ListTile(
-                                                          title: Text("Morning Slot : ${tablet.morningSlot.slotStartTime}-${tablet.morningSlot.slotEndTime}"),
-                                                          subtitle: Row(
-                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                            children: [
-                                                              Text("Status : Running",style: TextStyle(color: Colors.green),),
-                                                              ElevatedButton(
-                                                                style: ElevatedButton.styleFrom(
-                                                                  backgroundColor: Colors.red,
-                                                                ),
-                                                                onPressed: (){
-                                                                  //making the call to the backend and accordingly updating the state
-                                                                }, 
-                                                                child: Text("Stop",style: TextStyle(color: Colors.white),)
-                                                                ),
-                                                            ],
+                                                          SizedBox(
+                                                            height:
+                                                                height * 0.01,
                                                           ),
-                                                        ),
-                                                      )
-                                                      :Container(
-                                                        decoration: BoxDecoration(
-                                                          border: Border.all(),
-                                                          borderRadius: BorderRadius.circular(10)
-                                                        ),
-                                                        child: ListTile(
-                                                          
-                                                          title: Text("Morning Slot : ${tablet.morningSlot.slotStartTime}-${tablet.morningSlot.slotEndTime}"),
-                                                          subtitle: Row(
-                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                            children: [
-                                                              Text("Status : Stopped",style: TextStyle(color: Colors.red),),
-                                                              ElevatedButton(
-                                                                style: ElevatedButton.styleFrom(
-                                                                  backgroundColor: Colors.green,
-                                                                ),
-                                                                onPressed: (){}, 
-                                                                child: Text("Start",style: TextStyle(color: Colors.white),)
-                                                                ),
-                                                            ],
+                                                          Text(
+                                                            "Duration : ${tablet.courseDuration}",
                                                           ),
-                                                        ),
-                                                      )
-                                                      :Text("morning Slot is not selected")
-                    
-                                                    ],
-                                                  ),
-                                                ),
+                                                          SizedBox(
+                                                            height:
+                                                                height * 0.01,
+                                                          ),
+                                                          Text(
+                                                            "Slots Running",
+                                                            style: TextStyle(
+                                                              fontSize: 18,
+                                                              color:
+                                                                  Colors.blue,
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            height:
+                                                                height * 0.01,
+                                                          ),
+                                                          tablet
+                                                                  .morningSlot
+                                                                  .slotSelected
+                                                              ? tablet
+                                                                        .morningSlot
+                                                                        .ScheduleRunning
+                                                                    ? Container(
+                                                                        decoration: BoxDecoration(
+                                                                          border:
+                                                                              Border.all(),
+                                                                          borderRadius: BorderRadius.circular(
+                                                                            10,
+                                                                          ),
+                                                                        ),
+                                                                        child: ListTile(
+                                                                          title: Text(
+                                                                            "Morning Slot : ${tablet.morningSlot.slotStartTime}-${tablet.morningSlot.slotEndTime}",
+                                                                          ),
+                                                                          subtitle: Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceBetween,
+                                                                            children: [
+                                                                              Text(
+                                                                                "Status : Running",
+                                                                                style: TextStyle(
+                                                                                  color: Colors.green,
+                                                                                ),
+                                                                              ),
+                                                                              ElevatedButton(
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: Colors.red,
+                                                                                ),
+                                                                                onPressed: () async {
+                                                                                  bool status = await StopMorningSchedule(
+                                                                                    tablet.id,
+                                                                                  );
+                                                                                  //making the call to the backend and accordingly updating the state
+                                                                                  setState(
+                                                                                    () {
+                                                                                      if (status &&
+                                                                                          mounted) {
+                                                                                        tablet.morningSlot.ScheduleRunning = false;
+                                                                                        Navigator.pop(
+                                                                                          context,
+                                                                                        );
+                                                                                      } else {
+                                                                                        ScaffoldMessenger.of(
+                                                                                          context,
+                                                                                        ).showSnackBar(
+                                                                                          SnackBar(
+                                                                                            content: Text(
+                                                                                              "Failed to stop schedule",
+                                                                                            ),
+                                                                                          ),
+                                                                                        );
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                                },
+                                                                                child: Text(
+                                                                                  "Stop",
+                                                                                  style: TextStyle(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                                    : Container(
+                                                                        decoration: BoxDecoration(
+                                                                          border:
+                                                                              Border.all(),
+                                                                          borderRadius: BorderRadius.circular(
+                                                                            10,
+                                                                          ),
+                                                                        ),
+                                                                        child: ListTile(
+                                                                          title: Text(
+                                                                            "Morning Slot : ${tablet.morningSlot.slotStartTime}-${tablet.morningSlot.slotEndTime}",
+                                                                          ),
+                                                                          subtitle: Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceBetween,
+                                                                            children: [
+                                                                              Text(
+                                                                                "Status : Stopped",
+                                                                                style: TextStyle(
+                                                                                  color: Colors.red,
+                                                                                ),
+                                                                              ),
+                                                                              ElevatedButton(
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: Colors.green,
+                                                                                ),
+                                                                                onPressed: () async {
+                                                                                  bool status = await startMorningSchedular(
+                                                                                    tablet.id,
+                                                                                  );
+                                                                                  setState(
+                                                                                    () {
+                                                                                      if (status &&
+                                                                                          mounted) {
+                                                                                        tablet.morningSlot.ScheduleRunning = true;
+                                                                                        Navigator.pop(
+                                                                                          context,
+                                                                                        );
+                                                                                      } else {
+                                                                                        ScaffoldMessenger.of(
+                                                                                          context,
+                                                                                        ).showSnackBar(
+                                                                                          SnackBar(
+                                                                                            content: Text(
+                                                                                              "Failed to start schedule",
+                                                                                            ),
+                                                                                          ),
+                                                                                        );
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                                },
+                                                                                child: Text(
+                                                                                  "Start",
+                                                                                  style: TextStyle(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                              : Text(
+                                                                  "morning Slot not available",
+                                                                ),
+
+                                                          SizedBox(
+                                                            height:
+                                                                height * 0.01,
+                                                          ),
+                                                          tablet
+                                                                  .afternoonSlot
+                                                                  .slotSelected
+                                                              ? tablet
+                                                                        .afternoonSlot
+                                                                        .ScheduleRunning
+                                                                    ? Container(
+                                                                        decoration: BoxDecoration(
+                                                                          border:
+                                                                              Border.all(),
+                                                                          borderRadius: BorderRadius.circular(
+                                                                            10,
+                                                                          ),
+                                                                        ),
+                                                                        child: ListTile(
+                                                                          title: Text(
+                                                                            "Afternoon Slot : ${tablet.afternoonSlot.slotStartTime}-${tablet.afternoonSlot.slotEndTime}",
+                                                                          ),
+                                                                          subtitle: Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceBetween,
+                                                                            children: [
+                                                                              Text(
+                                                                                "Status : Running",
+                                                                                style: TextStyle(
+                                                                                  color: Colors.green,
+                                                                                ),
+                                                                              ),
+                                                                              ElevatedButton(
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: Colors.red,
+                                                                                ),
+                                                                                onPressed: () async{
+                                                                                  //making the call to the backend and accordingly updating the state
+                                                                                  bool status = await stopAfternoonSchedule(
+                                                                                    tablet.id,
+                                                                                  );
+                                                                                  //making the call to the backend and accordingly updating the state
+                                                                                  setState(
+                                                                                    () {
+                                                                                      if (status &&
+                                                                                          mounted) {
+                                                                                        tablet.morningSlot.ScheduleRunning = false;
+                                                                                        Navigator.pop(
+                                                                                          context,
+                                                                                        );
+                                                                                      } else {
+                                                                                        ScaffoldMessenger.of(
+                                                                                          context,
+                                                                                        ).showSnackBar(
+                                                                                          SnackBar(
+                                                                                            content: Text(
+                                                                                              "Failed to stop schedule",
+                                                                                            ),
+                                                                                          ),
+                                                                                        );
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                                },
+                                                                                child: Text(
+                                                                                  "Stop",
+                                                                                  style: TextStyle(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                                    : Container(
+                                                                        decoration: BoxDecoration(
+                                                                          border:
+                                                                              Border.all(),
+                                                                          borderRadius: BorderRadius.circular(
+                                                                            10,
+                                                                          ),
+                                                                        ),
+                                                                        child: ListTile(
+                                                                          title: Text(
+                                                                            "Afternoon Slot : ${tablet.afternoonSlot.slotStartTime}-${tablet.afternoonSlot.slotEndTime}",
+                                                                          ),
+                                                                          subtitle: Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceBetween,
+                                                                            children: [
+                                                                              Text(
+                                                                                "Status : Stopped",
+                                                                                style: TextStyle(
+                                                                                  color: Colors.red,
+                                                                                ),
+                                                                              ),
+                                                                              ElevatedButton(
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: Colors.green,
+                                                                                ),
+                                                                                onPressed: () async{
+                                                                                  bool status = await startAfternoonSchedular(
+                                                                                    tablet.id,
+                                                                                  );
+                                                                                  //making the call to the backend and accordingly updating the state
+                                                                                  setState(
+                                                                                    () {
+                                                                                      if (status &&
+                                                                                          mounted) {
+                                                                                        tablet.morningSlot.ScheduleRunning = false;
+                                                                                        Navigator.pop(
+                                                                                          context,
+                                                                                        );
+                                                                                      } else {
+                                                                                        ScaffoldMessenger.of(
+                                                                                          context,
+                                                                                        ).showSnackBar(
+                                                                                          SnackBar(
+                                                                                            content: Text(
+                                                                                              "Failed to start schedule",
+                                                                                            ),
+                                                                                          ),
+                                                                                        );
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                                },
+                                                                                child: Text(
+                                                                                  "Start",
+                                                                                  style: TextStyle(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                              : Text(
+                                                                  "Afternoon Slot not available",
+                                                                ),
+
+                                                          SizedBox(
+                                                            height:
+                                                                height * 0.01,
+                                                          ),
+                                                          tablet
+                                                                  .eveningSlot
+                                                                  .slotSelected
+                                                              ? tablet
+                                                                        .eveningSlot
+                                                                        .ScheduleRunning
+                                                                    ? Container(
+                                                                        decoration: BoxDecoration(
+                                                                          border:
+                                                                              Border.all(),
+                                                                          borderRadius: BorderRadius.circular(
+                                                                            10,
+                                                                          ),
+                                                                        ),
+                                                                        child: ListTile(
+                                                                          title: Text(
+                                                                            "Evening Slot : ${tablet.eveningSlot.slotStartTime}-${tablet.eveningSlot.slotEndTime}",
+                                                                          ),
+                                                                          subtitle: Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceBetween,
+                                                                            children: [
+                                                                              Text(
+                                                                                "Status : Running",
+                                                                                style: TextStyle(
+                                                                                  color: Colors.green,
+                                                                                ),
+                                                                              ),
+                                                                              ElevatedButton(
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: Colors.red,
+                                                                                ),
+                                                                                onPressed: ()async {
+                                                                                  //making the call to the backend and accordingly updating the state
+                                                                                  bool status = await stopEveningSchedule(
+                                                                                    tablet.id,
+                                                                                  );
+                                                                                  //making the call to the backend and accordingly updating the state
+                                                                                  setState(
+                                                                                    () {
+                                                                                      if (status &&
+                                                                                          mounted) {
+                                                                                        tablet.morningSlot.ScheduleRunning = false;
+                                                                                        Navigator.pop(
+                                                                                          context,
+                                                                                        );
+                                                                                      } else {
+                                                                                        ScaffoldMessenger.of(
+                                                                                          context,
+                                                                                        ).showSnackBar(
+                                                                                          SnackBar(
+                                                                                            content: Text(
+                                                                                              "Failed to stop schedule",
+                                                                                            ),
+                                                                                          ),
+                                                                                        );
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                                },
+                                                                                child: Text(
+                                                                                  "Stop",
+                                                                                  style: TextStyle(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                                    : Container(
+                                                                        decoration: BoxDecoration(
+                                                                          border:
+                                                                              Border.all(),
+                                                                          borderRadius: BorderRadius.circular(
+                                                                            10,
+                                                                          ),
+                                                                        ),
+                                                                        child: ListTile(
+                                                                          title: Text(
+                                                                            "Evening Slot : ${tablet.eveningSlot.slotStartTime}-${tablet.eveningSlot.slotEndTime}",
+                                                                          ),
+                                                                          subtitle: Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.spaceBetween,
+                                                                            children: [
+                                                                              Text(
+                                                                                "Status : Stopped",
+                                                                                style: TextStyle(
+                                                                                  color: Colors.red,
+                                                                                ),
+                                                                              ),
+                                                                              ElevatedButton(
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: Colors.green,
+                                                                                ),
+                                                                                onPressed: () async{
+                                                                                  bool status = await startEveningSchedular(
+                                                                                    tablet.id,
+                                                                                  );
+                                                                                  //making the call to the backend and accordingly updating the state
+                                                                                  setState(
+                                                                                    () {
+                                                                                      if (status &&
+                                                                                          mounted) {
+                                                                                        tablet.morningSlot.ScheduleRunning = false;
+                                                                                        Navigator.pop(
+                                                                                          context,
+                                                                                        );
+                                                                                      } else {
+                                                                                        ScaffoldMessenger.of(
+                                                                                          context,
+                                                                                        ).showSnackBar(
+                                                                                          SnackBar(
+                                                                                            content: Text(
+                                                                                              "Failed to start schedule",
+                                                                                            ),
+                                                                                          ),
+                                                                                        );
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                                },
+                                                                                child: Text(
+                                                                                  "Start",
+                                                                                  style: TextStyle(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                              : Text(
+                                                                  "Evening Slot not available",
+                                                                ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
                                               );
-                                          },);
-                                        }, child: Text("Open"))
-                                      ],
+                                            },
+                                            child: Text(
+                                              "Open",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     );
                                   },
                                 );
