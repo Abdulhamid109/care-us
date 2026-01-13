@@ -38,6 +38,36 @@ class _IvrpageState extends State<Ivrpage> {
     }
   }
 
+  Future IVR() async {
+    try {
+      //if the call is happend today then the schema will not be created in the db hence there will be no data
+      final String date =
+          "${_selectedDay.day}/${_selectedDay.month}/${_selectedDay.year}";
+      print(date);
+      final response = await http.post(
+        Uri.parse("$localhost/api/getIVR/${widget.tabletid}"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"date": date}),
+      );
+
+      if (response.statusCode == 200) {
+        print("Response Body => " + response.body);
+        // just check the response in every slot like in morning slot evening slot
+      } else {
+        print("Error Occured => ${response.statusCode} + ${response.body}");
+      }
+    } catch (e) {
+      print("Failed to perform the functionality $e");
+      throw e;
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height * 1;
@@ -77,6 +107,7 @@ class _IvrpageState extends State<Ivrpage> {
                     setState(() {
                       _selectedDay = selectedDay;
                       _focusedDay = focusedDay;
+                      IVR();
                     });
                   },
                   calendarFormat: CalendarFormat.week,
@@ -132,22 +163,27 @@ class _IvrpageState extends State<Ivrpage> {
                                         Padding(
                                           padding: const EdgeInsets.all(5.0),
                                           child: Text(
-                                          "Patient Record",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 18,
+                                            "Patient Record",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 18,
+                                            ),
                                           ),
-                                                                                  ),
                                         ),
                                         SizedBox(height: 10),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Padding(
-                                              padding: const EdgeInsets.all(8.0),
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
                                               child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
                                                     snapshot
@@ -157,46 +193,73 @@ class _IvrpageState extends State<Ivrpage> {
                                                     snapshot
                                                         .data["tablet"]["tabletName"],
                                                   ),
-                                                  Text(
-                                                    "${snapshot.data["tablet"]["SlotType"]} Section",
-                                                  ),
+                                                  //checcking the morning slot and accordingly updating the 
+                                                  snapshot.data["tablet"]["MorningSlot"]["SlotSelected"]?
+                                                  SizedBox(
+                                                    width: 402,
+                                                    child: Text("Morning slot is selected => user can see that it should display either pending(check for call schedule time and current time),done(if the status is updated => if call status is true),failed(send the message to guradian)->for tablets",style: TextStyle(fontSize: 15),))
+                                                  :Text("")
                                                 ],
                                               ),
                                             ),
                                             Column(
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Container(
                                                   decoration: BoxDecoration(
-                                                    color: Colors.green.shade200,
-                                                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                                                    border: Border.all(color: Colors.grey)
+                                                    color:
+                                                        Colors.green.shade200,
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                          Radius.circular(15),
+                                                        ),
+                                                    border: Border.all(
+                                                      color: Colors.grey,
+                                                    ),
                                                   ),
                                                   child: Padding(
-                                                    padding: const EdgeInsets.all(5.0),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          5.0,
+                                                        ),
                                                     child: Row(
                                                       children: [
-                                                        Text("Took Medicine",style: TextStyle(color: Colors.white),),
-                                                        SizedBox(
-                                                          width: 5,
+                                                        Text(
+                                                          "Took Medicine",
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                          ),
                                                         ),
-                                                        Icon(Icons.check,size: 20,color: Colors.white,)
+                                                        SizedBox(width: 5),
+                                                        Icon(
+                                                          Icons.check,
+                                                          size: 20,
+                                                          color: Colors.white,
+                                                        ),
                                                       ],
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(height: 5,),
+                                                SizedBox(height: 5),
                                                 ElevatedButton(
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.blue,
-                                                    
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.blue,
+                                                      ),
+                                                  onPressed: () {},
+                                                  child: Text(
+                                                    "Update Status",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
                                                   ),
-                                                  onPressed: (){
-                                                    
-                                                  }, child: Text("Update Status",style: TextStyle(color: Colors.white),))
+                                                ),
                                               ],
-                                            )
+                                            ),
                                           ],
                                         ),
                                       ],
