@@ -256,7 +256,60 @@ class _IvrpageState extends State<Ivrpage> {
                                                       ),
                                                       ),)
                                                   :Text("Morning Slot not available"),
+                                                  
+                                                  SizedBox(height: 5,),
+                                                  snapshot.data["tablet"]["AfternoonSlot"]["SlotSelected"]?
+                                                  SizedBox(
+                                                    width: 402,
+                                                    child: ListTile(
+                                                      title: Text("AfternoonSlot Slot",style: TextStyle(fontSize: 15),),
+                                                      subtitle: Column(
+                                                        mainAxisAlignment: MainAxisAlignment.start,
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text("Start Time: ${snapshot.data["tablet"]["AfternoonSlot"]["SlotStartTime"]}"),
+                                                          Text("End Time Time: ${snapshot.data["tablet"]["AfternoonSlot"]["SlotEndTime"]}"),
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                            children: [
+                                                              Text("Medicine took status : $morningMedStatus"),
+                                                              TextButton(onPressed: (){}, child: Text("Update"))
+                                                            ],
+                                                          ),
 
+                                                        ],
+                                                      ),
+                                                      ),)
+                                                  :Text("Aftnoon Slot not available"),
+                                                  
+                                                  SizedBox(height: 5,),
+
+                                                  snapshot.data["tablet"]["EveningSlot"]["SlotSelected"]?
+                                                  SizedBox(
+                                                    width: 402,
+                                                    child: ListTile(
+                                                      title: Text("EveningSlot Slot",style: TextStyle(fontSize: 15),),
+                                                      subtitle: Column(
+                                                        mainAxisAlignment: MainAxisAlignment.start,
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text("Start Time: ${snapshot.data["tablet"]["EveningSlot"]["SlotStartTime"]}"),
+                                                          Text("End Time Time: ${snapshot.data["tablet"]["EveningSlot"]["SlotEndTime"]}"),
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                            children: [
+                                                              Text("Medicine took status : $morningMedStatus"),
+                                                              TextButton(onPressed: (){}, child: Text("Update"))
+                                                            ],
+                                                          ),
+
+                                                        ],
+                                                      ),
+                                                      ),)
+                                                  :Text("EveningSlot Slot not available"),
+                                                  
+                                                  
+                                                  
 
                                                   
                                                 ],
