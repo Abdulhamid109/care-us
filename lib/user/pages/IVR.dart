@@ -19,6 +19,11 @@ class _IvrpageState extends State<Ivrpage> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
 
+  String? morningMedStatus;
+  var data = [];
+  
+
+
   Future TabletDetails() async {
     try {
       final response = await http.get(
@@ -26,6 +31,9 @@ class _IvrpageState extends State<Ivrpage> {
       );
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
+        if(jsonData["tablet"]["MorningSlot"]["SlotSelected"]){
+
+        }
         return jsonData;
       } else {
         print(
@@ -52,6 +60,9 @@ class _IvrpageState extends State<Ivrpage> {
 
       if (response.statusCode == 200) {
         print("Response Body => " + response.body);
+        final jsonData = await jsonDecode(response.body);
+        
+        return jsonData;
         // just check the response in every slot like in morning slot evening slot
       } else {
         print("Error Occured => ${response.statusCode} + ${response.body}");
@@ -61,6 +72,29 @@ class _IvrpageState extends State<Ivrpage> {
       throw e;
     }
   }
+
+  Future <void> medicineStatus() async{
+    try {
+      //based on the slot selected and the calling hour with the current hour we are going to check if its pending,completed 
+      final response = await http.get(
+        Uri.parse("$localhost/api/getMorningMedStatus/${widget.tabletid}")
+      );
+
+      if(response.statusCode==200){
+        final jsonData =  jsonDecode(response.body);
+        print("debigginh");
+        print(jsonData);
+        setState(() {
+          morningMedStatus = jsonData["message"];
+        });
+      }
+
+    } catch (e) {
+      print("Failed to perform the functionality $e");
+      throw e;
+    }
+  }
+
 
   @override
   void initState() {
@@ -100,14 +134,16 @@ class _IvrpageState extends State<Ivrpage> {
                 child: TableCalendar(
                   headerVisible: false,
                   firstDay: DateTime.now().subtract(Duration(days: 365)),
-                  lastDay: DateTime.now().add(Duration(days: 365)),
+                  lastDay: DateTime.now(),
                   focusedDay: _focusedDay,
                   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                   onDaySelected: (selectedDay, focusedDay) {
                     setState(() {
                       _selectedDay = selectedDay;
                       _focusedDay = focusedDay;
-                      IVR();
+                      final datas=IVR();
+                       print(datas);
+                      //  medicineStatus();
                     });
                   },
                   calendarFormat: CalendarFormat.week,
@@ -194,72 +230,39 @@ class _IvrpageState extends State<Ivrpage> {
                                                         .data["tablet"]["tabletName"],
                                                   ),
                                                   //checcking the morning slot and accordingly updating the 
+                                                  //"Morning slot is selected => user can see that it should 
+                                                  //display either pending(check for call schedule time and current time)
+                                                  //,done(if the status is updated => if call status is true),failed(send the message to guradian)->for tablets"
                                                   snapshot.data["tablet"]["MorningSlot"]["SlotSelected"]?
                                                   SizedBox(
                                                     width: 402,
-                                                    child: Text("Morning slot is selected => user can see that it should display either pending(check for call schedule time and current time),done(if the status is updated => if call status is true),failed(send the message to guradian)->for tablets",style: TextStyle(fontSize: 15),))
-                                                  :Text("")
+                                                    child: ListTile(
+                                                      title: Text("Morning Slot",style: TextStyle(fontSize: 15),),
+                                                      subtitle: Column(
+                                                        mainAxisAlignment: MainAxisAlignment.start,
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text("Start Time: ${snapshot.data["tablet"]["MorningSlot"]["SlotStartTime"]}"),
+                                                          Text("End Time Time: ${snapshot.data["tablet"]["MorningSlot"]["SlotEndTime"]}"),
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                            children: [
+                                                              Text("Medicine took status : $morningMedStatus"),
+                                                              TextButton(onPressed: (){}, child: Text("Update"))
+                                                            ],
+                                                          ),
+
+                                                        ],
+                                                      ),
+                                                      ),)
+                                                  :Text("Morning Slot not available"),
+
+
+                                                  
                                                 ],
                                               ),
                                             ),
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    color:
-                                                        Colors.green.shade200,
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                          Radius.circular(15),
-                                                        ),
-                                                    border: Border.all(
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          5.0,
-                                                        ),
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          "Took Medicine",
-                                                          style: TextStyle(
-                                                            color: Colors.white,
-                                                          ),
-                                                        ),
-                                                        SizedBox(width: 5),
-                                                        Icon(
-                                                          Icons.check,
-                                                          size: 20,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(height: 5),
-                                                ElevatedButton(
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                        backgroundColor:
-                                                            Colors.blue,
-                                                      ),
-                                                  onPressed: () {},
-                                                  child: Text(
-                                                    "Update Status",
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                            
                                           ],
                                         ),
                                       ],
