@@ -55,25 +55,6 @@ class _AddpatientspageState extends State<Addpatientspage> {
     }
   }
 
-  Future callInstantiate() async {
-    try {
-      final response = await http.post(
-        Uri.parse("$localhost/api/ivr/makecall"),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'phoneNumber': "+919860573041"}),
-      );
-
-      if (response.statusCode == 200) {
-        print("Response => ${response.body}");
-      } else {
-        print(
-          "Error at response code ${response.statusCode} with response body ${response.body}",
-        );
-      }
-    } catch (e) {
-      print("Failed to perform the functionality => $e");
-    }
-  }
   
   @override
   Widget build(BuildContext context) {
@@ -127,13 +108,11 @@ class _AddpatientspageState extends State<Addpatientspage> {
                             ),
                           ),
                         );
-                        await callInstantiate();
-                        // Future.delayed(Duration(seconds: 2), () {
-                        //   Navigator.pushReplacement(
-                        //     context,
-                        //     MaterialPageRoute(builder: (context) => Homepage()),
-                        //   );
-                        // });
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => Homepage()),
+                          );
+                        
                       },
                 child: Text(currentStep < 2 ? "continue" : "Done"),
               ),

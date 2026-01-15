@@ -108,25 +108,28 @@ class _TabletsectionState extends State<Tabletsection> {
         final jsondata = await jsonDecode(response.body);
         final tabletdata = jsondata["tablets"];
         final tabletid = tabletdata["_id"];
-        // Future.delayed(Duration(seconds: 3), () {
-        //   illnessController.clear();
-        //   tabletName.clear();
-        //   tabletfrequency.clear();
-        //   courseDuration.clear();
-        //   // selectedValue = 'Morning';
-        //   morningSlotSelected = false;
-        //   AfternoonSlotSelected = false;
-        //   EveningSlotSelected = false;
+        Future.delayed(Duration(seconds: 3), () {
+          illnessController.clear();
+          tabletName.clear();
+          tabletfrequency.clear();
+          courseDuration.clear();
+          setState(() {
+            morningSlotSelected = false;
+          AfternoonSlotSelected = false;
+          EveningSlotSelected = false;
 
-        //   MorningSlotStartTime = '';
-        //   MorningSlotEndTime = '';
+          MorningSlotStartTime = '';
+          MorningSlotEndTime = '';
 
-        //   AfternoonSlotStartTime = '';
-        //   AfternoonSlotEndTime = '';
+          AfternoonSlotStartTime = '';
+          AfternoonSlotEndTime = '';
 
-        //   EveningSlotStartTime = '';
-        //   EveningSlotEndTime = '';
-        // });
+          EveningSlotStartTime = '';
+          EveningSlotEndTime = '';
+          });
+          // selectedValue = 'Morning';
+          
+        });
         print("8888888888888888888888888888888");
         print("Tablets id "+tabletid);
         print("77777777777777777777777777777");
